@@ -29,7 +29,9 @@ namespace Hikaria.ReverseFriendlyFire.Patches
                 __instance.OnTargetDetected += (new Action(delegate ()
                 {
                     TripMineDatas[instanceID].triggeredByDetection = true;
+#if DEBUG
                     Logs.LogMessage(string.Format("Mine (OnTargetDetected), Mine: {0}", instanceID));
+#endif
                 }));
             }
         }
@@ -46,7 +48,9 @@ namespace Hikaria.ReverseFriendlyFire.Patches
                     data.owner.Set(player.PlayerAgent.Cast<PlayerAgent>());
                     TripMineDatas.Add(__instance.GetInstanceID(), data);
                     TripMineDamagableOwner.Add(__instance.m_damage.GetInstanceID(), __instance.GetInstanceID());
+#if DEBUG
                     Logs.LogMessage(string.Format("Mine (OnSpawnData), Mine: {0}, Owner: {1}", __instance.GetInstanceID(), player.NickName));
+#endif
                 }
             }
         }
@@ -71,7 +75,9 @@ namespace Hikaria.ReverseFriendlyFire.Patches
                 if (TripMineDatas[TripMineDamagableOwner[instanceID]].type == MineType.Explosive)
                 {
                     TripMineDatas[TripMineDamagableOwner[instanceID]].triggeredByLocalPlayer = true;
+#if DEBUG
                     Logs.LogMessage(string.Format("Mine (OnTriggerByBulletDamage), Mine: {0}", TripMineDamagableOwner[instanceID]));
+#endif
                 }
             }
         }
@@ -86,7 +92,9 @@ namespace Hikaria.ReverseFriendlyFire.Patches
                 if (TripMineDatas[TripMineDamagableOwner[instanceID]].type == MineType.Explosive)
                 {
                     TripMineDatas[TripMineDamagableOwner[instanceID]].triggeredByExplosion = true;
+#if DEBUG
                     Logs.LogMessage(string.Format("Mine (OnTriggerByExplosionDamage), Mine: {0}", TripMineDamagableOwner[instanceID]));
+#endif
                 }
             }
         }
@@ -116,11 +124,15 @@ namespace Hikaria.ReverseFriendlyFire.Patches
                     }
                     else if (!LastTrigger.TryGet(out PlayerAgent lastTrigger) || lastTrigger == null)
                     {
+#if DEBUG
                         Logs.LogMessage(string.Format("Mine (OnTriggerExplosiveMine), Mine: {0}, Trigger: Null", instanceID));
+#endif
                         return;
                     }
+#if DEBUG
                     TripMineDatas[instanceID].trigger.TryGet(out PlayerAgent trigger);
                     Logs.LogMessage(string.Format("Mine (OnTriggerExplosiveMine), Mine: {0}, Trigger: {1}", instanceID, trigger.Owner.NickName));
+#endif
                 }
             }
         }
@@ -148,20 +160,26 @@ namespace Hikaria.ReverseFriendlyFire.Patches
             }
             if (!TripMineDatas[currentMine].trigger.TryGet(out PlayerAgent trigger) || trigger == null)
             {
+#if DEBUG
                 Logs.LogMessage(string.Format("Mine (OnExplosionDamage), Mine: {0}, Trigger: Null", currentMine));
+#endif
                 return;
             }
             damage = Math.Clamp(damage * EntryPoint.Instance.reverseFriendlyFireMulti, 0f, __instance.HealthMax);
             float targetHealth = Math.Clamp(trigger.Damage.Health - damage, 0.01f, trigger.Damage.HealthMax);
             trigger.Damage.SendSetHealth(targetHealth);
+#if DEBUG
             TripMineDatas[currentMine].owner.TryGet(out PlayerAgent owner);
             Logs.LogMessage(string.Format("Mine (OnExplosionDamage), Mine: {0}, Owner: {1}, Trigger: {2}, Target: {3}", currentMine, owner.Owner.NickName, trigger.Owner.NickName, __instance.Owner.Owner.NickName));
+#endif
         }
 
         private static void OnPreMineDestroy(MineDeployerInstance __instance)
         {
             int instanceID = __instance.GetInstanceID();
+#if DEBUG
             Logs.LogMessage(string.Format("Mine (OnDestroy), Mine: {0}", instanceID));
+#endif
             if (TripMineDatas.ContainsKey(instanceID))
             {
                 TripMineDatas.Remove(instanceID);
