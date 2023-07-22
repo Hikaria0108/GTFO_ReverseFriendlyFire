@@ -151,9 +151,13 @@ namespace Hikaria.ReverseFriendlyFire.Patches
 
         private static void OnPreExplosionDamage(Dam_PlayerDamageBase __instance, ref pExplosionDamageData data)
         {
-            float damage = data.damage.Get(__instance.HealthMax);
-            data.damage.Set(damage * EntryPoint.Instance.friendlyFireMulti, __instance.HealthMax);
             int currentMine = MineStack.Peek();
+            float damage = data.damage.Get(__instance.HealthMax);
+            TripMineDatas[currentMine].owner.TryGet(out PlayerAgent owner);
+            if (owner.Owner.Lookup != __instance.Owner.Owner.Lookup)
+            {
+                data.damage.Set(damage * EntryPoint.Instance.friendlyFireMulti, __instance.HealthMax);
+            }
             if (TripMineDatas[currentMine].triggeredByDetection)
             {
                 return;
@@ -165,11 +169,12 @@ namespace Hikaria.ReverseFriendlyFire.Patches
 #endif
                 return;
             }
+
             damage = Math.Clamp(damage * EntryPoint.Instance.reverseFriendlyFireMulti, 0f, __instance.HealthMax);
             float targetHealth = Math.Clamp(trigger.Damage.Health - damage, 0.01f, trigger.Damage.HealthMax);
             trigger.Damage.SendSetHealth(targetHealth);
 #if DEBUG
-            TripMineDatas[currentMine].owner.TryGet(out PlayerAgent owner);
+
             Logs.LogMessage(string.Format("Mine (OnExplosionDamage), Mine: {0}, Owner: {1}, Trigger: {2}, Target: {3}", currentMine, owner.Owner.NickName, trigger.Owner.NickName, __instance.Owner.Owner.NickName));
 #endif
         }
